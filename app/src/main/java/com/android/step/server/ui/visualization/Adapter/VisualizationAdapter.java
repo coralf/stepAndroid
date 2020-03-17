@@ -1,16 +1,13 @@
-package com.android.step.ui.visualization.Adapter;
+package com.android.step.server.ui.visualization.Adapter;
 
-
-import android.os.Bundle;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.android.step.ui.visualization.fragments.AccelerationFragment;
-import com.android.step.ui.visualization.fragments.GPSFragment;
-import com.android.step.ui.visualization.fragments.GravityFragment;
+import com.android.step.server.ui.visualization.fragments.AccelerationFragment;
+import com.android.step.server.ui.visualization.fragments.GPSFragment;
+import com.android.step.server.ui.visualization.fragments.GravityFragment;
 
 import java.util.ArrayList;
 import java.util.List;

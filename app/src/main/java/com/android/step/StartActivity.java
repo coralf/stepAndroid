@@ -3,11 +3,11 @@ package com.android.step;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import com.android.step.client.LeftActivity;
+import com.android.step.server.RightActivity;
+import com.android.step.utils.Config;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 
@@ -22,12 +22,14 @@ public class StartActivity extends AppCompatActivity {
 
         vLeft.setOnClickListener(v -> {
             Intent intent = new Intent(StartActivity.this, LeftActivity.class);
+            intent.putExtra("from", Config.CLIENT);
             startActivity(intent);
         });
 
 
         vRight.setOnClickListener(v -> {
             Intent intent = new Intent(StartActivity.this, RightActivity.class);
+            intent.putExtra("from", Config.SERVER);
             startActivity(intent);
         });
 

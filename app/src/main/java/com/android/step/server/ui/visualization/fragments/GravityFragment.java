@@ -1,4 +1,4 @@
-package com.android.step.ui.visualization.fragments;
+package com.android.step.server.ui.visualization.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,14 +11,21 @@ import androidx.fragment.app.Fragment;
 
 import com.android.step.R;
 
-public class AccelerationFragment extends Fragment {
+public class GravityFragment extends Fragment {
+    public static final String ARG_OBJECT = "object";
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_visualization_acceleration, container, false);
+
+
+        View root = inflater.inflate(R.layout.fragment_visualization_gravity, container, false);
+
+
+        return root;
     }
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

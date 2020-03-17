@@ -1,4 +1,4 @@
-package com.android.step.ui.visualization.fragments;
+package com.android.step.client.ui.visualization.fragments;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -18,23 +18,27 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 
 import com.android.step.R;
+import com.android.step.client.LeftActivity;
+import com.android.step.client.net.Client;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.ContentValues.TAG;
 
 public class GPSFragment extends Fragment implements SensorEventListener {
+
 
     private LineChart lineChart;
     private SensorManager sensorManager;
@@ -81,10 +85,13 @@ public class GPSFragment extends Fragment implements SensorEventListener {
         return root;
     }
 
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+//        LeftActivity activity = (LeftActivity) getActivity();
+
     }
 
 
@@ -124,7 +131,13 @@ public class GPSFragment extends Fragment implements SensorEventListener {
             // AxisDependency.LEFT);
         }
 
+//        Log.d(TAG, "onSensorChanged: client....");
 
+        LeftActivity activity = (LeftActivity) getActivity();
+        Client client = activity.client;
+        if (client != null) {
+            client.send(z + "");
+        }
     }
 
     @Override

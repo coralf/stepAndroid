@@ -12,8 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RightActivity"></activity>
-        <activity android:name=".LeftActivity" />
+        <activity android:name=".server.RightActivity"></activity>
+        <activity android:name=".client.LeftActivity" />
         <activity
             android:name=".StartActivity"
             android:label="@string/title_activity_start"
@@ -24,9 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name" />
     </application>
 
 </manifest>

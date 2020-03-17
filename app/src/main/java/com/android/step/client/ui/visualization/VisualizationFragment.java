@@ -1,7 +1,6 @@
-package com.android.step.ui.visualization;
+package com.android.step.client.ui.visualization;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.android.step.R;
-import com.android.step.ui.visualization.Adapter.VisualizationAdapter;
+import com.android.step.client.ui.visualization.Adapter.VisualizationAdapter;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
