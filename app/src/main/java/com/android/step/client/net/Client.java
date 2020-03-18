@@ -8,61 +8,73 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class Client {
-    private Socket socket = null;
-    private OutputStream outputStream = null;
+
+    private volatile Socket socket = null;
+    private volatile OutputStream outputStream = null;
     private ThreadPoolExecutor poolExecutor = null;
 
 
-    public Client() {
-        poolExecutor = new ThreadPoolExecutor(3, 5,
-                1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(128));
-
-        poolExecutor.execute(new Thread(() -> {
-            try {
-                socket = new Socket("192.168.199.137", 1210);
-                outputStream = socket.getOutputStream();
-//                int i = 0;
-//                while (true) {
-//                    String msg = "hello 我是客户端:" + (i++);
-//                    outputStream.write(msg.getBytes("UTF-8"));
-//                    Thread.sleep(5);
-//                }
-            } catch (Exception e) {
-                if (outputStream != null) {
-                    try {
-                        outputStream.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-                if (socket != null) {
-                    try {
-                        socket.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-                e.printStackTrace();
-            }
-
-        }));
-
+    private Client() {
 
     }
 
+    private static class SingletonHolder {
+        private static Client client = new Client();
+    }
 
-    public void send(String msg) {
-        if (poolExecutor != null) {
+
+    public static Client getClient() {
+        return SingletonHolder.client;
+    }
+
+
+    public synchronized void send(String msg) {
+        if (poolExecutor == null) {
+            poolExecutor = new ThreadPoolExecutor(3, 5,
+                    1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(128));
+        }
+        if (socket == null) {
             poolExecutor.execute(new Thread(() -> {
-                if (outputStream != null) {
+                synchronized (getClient()) {
+                    try {
+                        socket = new Socket("192.168.199.137", 1210);
+                        outputStream = socket.getOutputStream();
+                    } catch (Exception e) {
+                        if (outputStream != null) {
+                            try {
+                                outputStream.close();
+                                outputStream = null;
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                        if (socket != null) {
+                            try {
+                                socket.close();
+                                socket = null;
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                        e.printStackTrace();
+                    }
+                }
+            }));
+        }
+        if (outputStream != null) {
+            poolExecutor.execute(new Thread(() -> {
+                synchronized (getClient()) {
                     try {
                         outputStream.write(msg.getBytes("UTF-8"));
+                        outputStream.flush();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
             }));
         }
+
+
     }
 
 

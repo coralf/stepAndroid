@@ -1,0 +1,73 @@
+package com.android.step.server.server;
+
+import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+public class Server {
+
+
+    public interface ServerCallBack {
+
+        void message(String msg);
+
+    }
+
+    private static final String TAG = "Server";
+    private ServerCallBack serverCallBack;
+
+    private static class ServerSingletonHolder {
+        private static Server server = new Server();
+    }
+
+    public Server() {
+
+        new Thread(() -> {
+            ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(3, 5,
+                    1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(128));
+            try {
+                int port = 1210;
+                ServerSocket s = new ServerSocket(port);
+                Log.d(TAG, "onCreate: 等待客户端连接");
+                while (true) {
+                    Socket socket = s.accept();
+                    poolExecutor.execute(() -> {
+                        InputStream inputStream = null;
+                        try {
+                            inputStream = socket.getInputStream();
+                            byte[] bytes = new byte[1024];
+                            int len;
+                            while ((len = inputStream.read(bytes)) != -1) {
+                                serverCallBack.message(new String(bytes, 0, len, "UTF-8"));
+                            }
+                            inputStream.close();
+                            socket.close();
+                            s.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    public void setOnServerMessageCallBack(ServerCallBack serverCallBack) {
+        this.serverCallBack = serverCallBack;
+    }
+
+
+    public static Server getServer() {
+        return ServerSingletonHolder.server;
+    }
+
+
+}

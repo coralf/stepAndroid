@@ -37,27 +37,7 @@ public class RightActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
 
 
-        new Thread(() -> {
-            int port = 1210;
-            try {
-                ServerSocket s = new ServerSocket(port);
 
-                Log.d(TAG, "onCreate: 等待客户端连接");
-
-                Socket socket = s.accept();
-                InputStream inputStream = socket.getInputStream();
-                byte[] bytes = new byte[1024];
-                int len;
-                while ((len = inputStream.read(bytes)) != -1) {
-                    Log.d(TAG, "客户端发来的消息: " + new String(bytes, 0, len, "UTF-8"));
-                }
-                inputStream.close();
-                socket.close();
-                s.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
 
 
     }

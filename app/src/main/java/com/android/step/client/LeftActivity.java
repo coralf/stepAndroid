@@ -9,7 +9,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.android.step.R;
-import com.android.step.client.net.Client;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.IOException;
@@ -17,7 +16,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 public class LeftActivity extends AppCompatActivity {
-    public Client client = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +30,5 @@ public class LeftActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-        client = new Client();
-
     }
 }

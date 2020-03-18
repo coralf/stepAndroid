@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.android.step.R;
+import com.android.step.server.server.Server;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -81,13 +82,22 @@ public class GPSFragment extends Fragment implements SensorEventListener {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+
+        Server server = Server.getServer();
+        server.setOnServerMessageCallBack(new Server.ServerCallBack() {
+            @Override
+            public void message(String msg) {
+                Log.d(TAG, "收到客户端发来的消息: " + msg);
+            }
+        });
+
     }
 
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         int z = (int) event.values[0];
-        Log.d(TAG, "onSensorChanged: " + z);
+//        Log.d(TAG, "onSensorChanged: " + z);
         int x = (int) event.values[1];
         int y = (int) event.values[2];
 
@@ -119,7 +129,6 @@ public class GPSFragment extends Fragment implements SensorEventListener {
             // chart.moveViewTo(data.getXValCount()-7, 55f,
             // AxisDependency.LEFT);
         }
-
 
 
 //        Log.d(TAG, "onSensorChanged: server....");
