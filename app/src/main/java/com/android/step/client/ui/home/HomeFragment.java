@@ -24,15 +24,7 @@ public class HomeFragment extends Fragment implements SensorEventListener {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
         View root = inflater.inflate(R.layout.fragment_home, container, false);
-
-//
-//        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-//        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-//
-//        Log.d(TAG, "onCreateView: " + sensor.getName());
-
         return root;
     }
 

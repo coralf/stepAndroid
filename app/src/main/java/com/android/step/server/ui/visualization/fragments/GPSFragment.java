@@ -84,11 +84,8 @@ public class GPSFragment extends Fragment implements SensorEventListener {
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
 
         Server server = Server.getServer();
-        server.setOnServerMessageCallBack(new Server.ServerCallBack() {
-            @Override
-            public void message(String msg) {
-                Log.d(TAG, "收到客户端发来的消息: " + msg);
-            }
+        server.setOnServerMessageCallBack(msg -> {
+            Log.d(TAG, "收到客户端发来的消息: " + msg);
         });
 
     }

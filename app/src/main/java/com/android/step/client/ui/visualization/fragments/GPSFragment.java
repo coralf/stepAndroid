@@ -132,7 +132,7 @@ public class GPSFragment extends Fragment implements SensorEventListener {
         }
 
 //        Log.d(TAG, "onSensorChanged: client....");
-        Client.getClient().send(z + "");
+        Client.getClient().send(z + "", getContext());
     }
 
     @Override

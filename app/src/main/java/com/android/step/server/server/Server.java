@@ -2,6 +2,9 @@ package com.android.step.server.server;
 
 import android.util.Log;
 
+import com.android.step.utils.Config;
+import com.github.mikephil.charting.utils.Utils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -32,8 +35,7 @@ public class Server {
             ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(3, 5,
                     1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(128));
             try {
-                int port = 1210;
-                ServerSocket s = new ServerSocket(port);
+                ServerSocket s = new ServerSocket(Config.port);
                 Log.d(TAG, "onCreate: 等待客户端连接");
                 while (true) {
                     Socket socket = s.accept();

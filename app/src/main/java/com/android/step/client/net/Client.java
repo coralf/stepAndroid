@@ -1,5 +1,12 @@
 package com.android.step.client.net;
 
+import android.content.Context;
+import android.net.DhcpInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+
+import com.android.step.utils.Config;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -12,10 +19,10 @@ public class Client {
     private volatile Socket socket = null;
     private volatile OutputStream outputStream = null;
     private ThreadPoolExecutor poolExecutor = null;
+    private volatile String serverAddress = null;
 
 
     private Client() {
-
     }
 
     private static class SingletonHolder {
@@ -28,7 +35,7 @@ public class Client {
     }
 
 
-    public synchronized void send(String msg) {
+    public synchronized void send(String msg, Context context) {
         if (poolExecutor == null) {
             poolExecutor = new ThreadPoolExecutor(3, 5,
                     1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(128));
@@ -37,7 +44,10 @@ public class Client {
             poolExecutor.execute(new Thread(() -> {
                 synchronized (getClient()) {
                     try {
-                        socket = new Socket("192.168.199.137", 1210);
+                        if (serverAddress == null) {
+                            serverAddress = getUrl(context);
+                        }
+                        socket = new Socket(serverAddress, Config.port);
                         outputStream = socket.getOutputStream();
                     } catch (Exception e) {
                         if (outputStream != null) {
@@ -75,6 +85,18 @@ public class Client {
         }
 
 
+    }
+
+    private String getUrl(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
+        int ipAddress = dhcpInfo.serverAddress;
+        return intToIp(ipAddress);
+    }
+
+    private String intToIp(int paramInt) {
+        return (paramInt & 0xFF) + "." + (0xFF & paramInt >> 8) + "." + (0xFF & paramInt >> 16) + "."
+                + (0xFF & paramInt >> 24);
     }
 
 
