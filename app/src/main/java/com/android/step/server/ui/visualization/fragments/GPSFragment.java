@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.android.step.R;
+import com.android.step.model.Orientation;
 import com.android.step.server.server.Server;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -28,6 +29,8 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+
+import java.util.ArrayList;
 
 import static android.content.ContentValues.TAG;
 
@@ -56,11 +59,21 @@ public class GPSFragment extends Fragment implements SensorEventListener {
 
         lineChart = root.findViewById(R.id.chartLine);
 
-        LineData data = new LineData();
-        data.setValueTextColor(Color.WHITE);
-        // add empty data
+        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(createSet("x"));
+        dataSets.add(createSet("y"));
+        LineData data = new LineData(dataSets);
+        data.setDrawValues(false);
         lineChart.setData(data);
-
+        lineChart.animateXY(2000, 2000);
+        lineChart.setViewPortOffsets(0, 0, 0, 0);
+//        lineChart.setBackgroundColor(Color.rgb(104, 241, 175));
+        lineChart.setDragEnabled(true);
+        lineChart.setScaleEnabled(true);
+        lineChart.setPinchZoom(false);
+        lineChart.getDescription().setEnabled(false);
+//        lineChart.setDrawGridBackground(false);
+        lineChart.setMaxHighlightDistance(300);
         XAxis xl = lineChart.getXAxis();
         xl.setTextColor(Color.WHITE);
         xl.setDrawGridLines(false);
@@ -101,15 +114,23 @@ public class GPSFragment extends Fragment implements SensorEventListener {
         LineData data = lineChart.getData();
 
         if (data != null) {
-            ILineDataSet set = data.getDataSetByIndex(0);
+            ILineDataSet setX = data.getDataSetByIndex(0);
+            ILineDataSet setY = data.getDataSetByIndex(1);
             // set.addEntry(...); // can be called as well
 
-            if (set == null) {
-                set = createSet();
-                data.addDataSet(set);
+            if (setX == null) {
+                setX = createSet("x");
+                data.addDataSet(setX);
             }
 
-            data.addEntry(new Entry(set.getEntryCount(), z), 0);
+            if (setY == null) {
+                setY = createSet("y");
+                data.addDataSet(setY);
+            }
+
+            data.addEntry(new Entry(setX.getEntryCount(), x), 0);
+            data.addEntry(new Entry(setY.getEntryCount(), y), 1);
+
             data.notifyDataChanged();
 
             // let the chart know it's data has changed
@@ -122,13 +143,9 @@ public class GPSFragment extends Fragment implements SensorEventListener {
             // move to the latest entry
             lineChart.moveViewToX(data.getEntryCount());
 
-            // this automatically refreshes the chart (calls invalidate())
-            // chart.moveViewTo(data.getXValCount()-7, 55f,
-            // AxisDependency.LEFT);
         }
 
 
-//        Log.d(TAG, "onSensorChanged: server....");
     }
 
     @Override
@@ -152,22 +169,26 @@ public class GPSFragment extends Fragment implements SensorEventListener {
         return getContext().getSystemService(service);
     }
 
-    private LineDataSet createSet() {
-        LineDataSet set = new LineDataSet(null, "Dynamic Data");
-//        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+    private LineDataSet createSet(String label) {
+        LineDataSet set = new LineDataSet(null, label);
         set.setColor(ColorTemplate.getHoloBlue());
-//        set.setCircleColor(Color.WHITE);
-        set.setLineWidth(2f);
-//        set.setCircleRadius(2f);
+        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        set.setCubicIntensity(0.2f);
         set.setDrawCircles(false);
-//        set.setFillAlpha(200);
-//        set.setFillColor(ColorTemplate.getHoloBlue());
-//        set.setHighLightColor(Color.rgb(244, 117, 117));
-//        set.setValueTextColor(Color.WHITE);
-//        set.setValueTextSize(9f);
-//        set.setColor(ColorTemplate.getHoloBlue());
-//        set.setCircleColor(Color.WHITE);
-        set.setDrawValues(false);
+        set.setLineWidth(1.8f);
+        set.setCircleRadius(4f);
+        set.setCircleColor(Color.WHITE);
+        set.setHighLightColor(Color.rgb(244, 117, 117));
+
+        if (label.equals(Orientation.X)) {
+            set.setColor(ColorTemplate.getHoloBlue());
+        } else if (label.equals(Orientation.Y)) {
+            set.setColor(getResources().getColor(R.color.colorAccent));
+        }
+
+//        set.setFillColor(Color.WHITE);
+//        set.setFillAlpha(100);
+        set.setDrawHorizontalHighlightIndicator(false);
         return set;
     }
 
