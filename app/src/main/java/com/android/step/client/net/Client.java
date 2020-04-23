@@ -78,6 +78,23 @@ public class Client {
                         outputStream.write(msg.getBytes("UTF-8"));
                         outputStream.flush();
                     } catch (IOException e) {
+                        if (outputStream != null) {
+                            try {
+                                outputStream.flush();
+                                outputStream.close();
+                                outputStream = null;
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                        if (socket != null) {
+                            try {
+                                socket.close();
+                                socket = null;
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
                         e.printStackTrace();
                     }
                 }

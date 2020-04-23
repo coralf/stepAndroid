@@ -36,29 +36,35 @@ public class Server {
                     1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(128));
             try {
                 ServerSocket s = new ServerSocket(Config.port);
-                Log.d(TAG, "onCreate: 等待客户端连接");
                 while (true) {
-                    Socket socket = s.accept();
-                    poolExecutor.execute(() -> {
-                        InputStream inputStream = null;
-                        try {
-                            inputStream = socket.getInputStream();
-                            byte[] bytes = new byte[1024];
-                            int len;
-                            while ((len = inputStream.read(bytes)) != -1) {
-                                serverCallBack.message(new String(bytes, 0, len, "UTF-8"));
+                    try {
+                        Socket socket = s.accept();
+                        poolExecutor.execute(() -> {
+                            InputStream inputStream = null;
+                            try {
+                                inputStream = socket.getInputStream();
+                                byte[] bytes = new byte[1024];
+                                int len;
+                                while ((len = inputStream.read(bytes)) != -1) {
+                                    serverCallBack.message(new String(bytes, 0, len, "UTF-8"));
+                                }
+                                inputStream.close();
+                                socket.close();
+                                s.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
-                            inputStream.close();
-                            socket.close();
-                            s.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            Log.d(TAG, "onCreate: 等待客户端连接");
+
+
         }).start();
     }
 

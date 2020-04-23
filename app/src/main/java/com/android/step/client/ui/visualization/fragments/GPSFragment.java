@@ -23,6 +23,8 @@ import androidx.fragment.app.FragmentActivity;
 import com.android.step.R;
 import com.android.step.client.LeftActivity;
 import com.android.step.client.net.Client;
+import com.android.step.model.Orientation;
+import com.android.step.utils.Config;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -30,7 +32,9 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -40,19 +44,12 @@ import static android.content.ContentValues.TAG;
 public class GPSFragment extends Fragment implements SensorEventListener {
 
 
-    private LineChart lineChart;
+    private LineChart lineChartX;
+    private LineChart lineChartY;
+    private LineChart lineChartZ;
     private SensorManager sensorManager;
     private Sensor sensor;
-    LineData lineData = new LineData();
 
-    private Handler handler = new Handler(Looper.getMainLooper()) {
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-
-
-        }
-    };
 
     @Nullable
     @Override
@@ -61,25 +58,13 @@ public class GPSFragment extends Fragment implements SensorEventListener {
         View root = inflater.inflate(R.layout.fragment_visualization_gps, container, false);
 
 
-        lineChart = root.findViewById(R.id.chartLine);
+        lineChartX = root.findViewById(R.id.chartLineX);
+        lineChartY = root.findViewById(R.id.chartLineY);
+        lineChartZ = root.findViewById(R.id.chartLineZ);
 
-        LineData data = new LineData();
-        data.setValueTextColor(Color.WHITE);
-        // add empty data
-        lineChart.setData(data);
-
-        XAxis xl = lineChart.getXAxis();
-        xl.setTextColor(Color.WHITE);
-        xl.setDrawGridLines(false);
-        xl.setAvoidFirstLastClipping(true);
-        xl.setEnabled(true);
-
-//        YAxis leftAxis = lineChart.getAxisLeft();
-        //
-//        leftAxis.setTextColor(Color.WHITE);
-//        leftAxis.setAxisMaximum(100f);
-//        leftAxis.setAxisMinimum(0f);
-//        leftAxis.setDrawGridLines(true);
+        initLineChart(lineChartX, Config.clientX);
+        initLineChart(lineChartY, Config.clientY);
+        initLineChart(lineChartZ, Config.clientZ);
 
 
         return root;
@@ -90,49 +75,20 @@ public class GPSFragment extends Fragment implements SensorEventListener {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-//        LeftActivity activity = (LeftActivity) getActivity();
-
     }
 
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         int z = (int) event.values[0];
-        Log.d(TAG, "onSensorChanged: " + z);
         int x = (int) event.values[1];
         int y = (int) event.values[2];
 
-        LineData data = lineChart.getData();
-
-        if (data != null) {
-            ILineDataSet set = data.getDataSetByIndex(0);
-            // set.addEntry(...); // can be called as well
-
-            if (set == null) {
-                set = createSet();
-                data.addDataSet(set);
-            }
-
-            data.addEntry(new Entry(set.getEntryCount(), z), 0);
-            data.notifyDataChanged();
-
-            // let the chart know it's data has changed
-            lineChart.notifyDataSetChanged();
-
-            // limit the number of visible entries
-            lineChart.setVisibleXRangeMaximum(100);
-            // chart.setVisibleYRange(30, AxisDependency.LEFT);
-
-            // move to the latest entry
-            lineChart.moveViewToX(data.getEntryCount());
-
-            // this automatically refreshes the chart (calls invalidate())
-            // chart.moveViewTo(data.getXValCount()-7, 55f,
-            // AxisDependency.LEFT);
-        }
-
-//        Log.d(TAG, "onSensorChanged: client....");
-        Client.getClient().send(z + "", getContext());
+        String jsonStr = new Gson().toJson(new Orientation(x, y, z));
+        Client.getClient().send(jsonStr, getContext());
+        setLineChartData(lineChartX, x, Config.clientX);
+        setLineChartData(lineChartY, y, Config.clientY);
+        setLineChartData(lineChartZ, z, Config.clientZ);
     }
 
     @Override
@@ -156,23 +112,88 @@ public class GPSFragment extends Fragment implements SensorEventListener {
         return getContext().getSystemService(service);
     }
 
-    private LineDataSet createSet() {
-        LineDataSet set = new LineDataSet(null, "Dynamic Data");
-//        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+
+    private LineDataSet createSet(String label) {
+        LineDataSet set = new LineDataSet(null, label);
         set.setColor(ColorTemplate.getHoloBlue());
-//        set.setCircleColor(Color.WHITE);
-        set.setLineWidth(2f);
-//        set.setCircleRadius(2f);
+        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        set.setCubicIntensity(0.2f);
         set.setDrawCircles(false);
-//        set.setFillAlpha(200);
-//        set.setFillColor(ColorTemplate.getHoloBlue());
-//        set.setHighLightColor(Color.rgb(244, 117, 117));
-//        set.setValueTextColor(Color.WHITE);
-//        set.setValueTextSize(9f);
-//        set.setColor(ColorTemplate.getHoloBlue());
-//        set.setCircleColor(Color.WHITE);
-        set.setDrawValues(false);
+        set.setLineWidth(1.8f);
+        set.setCircleRadius(4f);
+        set.setCircleColor(Color.WHITE);
+        set.setHighLightColor(Color.rgb(244, 117, 117));
+
+ /*       if (label.equals(Orientation.X)) {
+            set.setColor(ColorTemplate.getHoloBlue());
+        } else if (label.equals(Orientation.Y)) {
+            set.setColor(getResources().getColor(R.color.colorAccent));
+        }*/
+
+        set.setColor(getResources().getColor(R.color.colorAccent));
+
+//        set.setFillColor(Color.WHITE);
+//        set.setFillAlpha(100);
+        set.setDrawHorizontalHighlightIndicator(false);
         return set;
+    }
+
+    private void initLineChart(LineChart lineChart, String label) {
+        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(createSet(label));
+//        dataSets.add(createSet("y"));
+        LineData data = new LineData(dataSets);
+        data.setDrawValues(false);
+        lineChart.setData(data);
+        lineChart.animateXY(2000, 2000);
+        lineChart.setViewPortOffsets(0, 0, 0, 0);
+//        lineChart.setBackgroundColor(Color.rgb(104, 241, 175));
+        lineChart.setDragEnabled(true);
+        lineChart.setScaleEnabled(true);
+        lineChart.setPinchZoom(false);
+        lineChart.getDescription().setEnabled(false);
+//        lineChart.setDrawGridBackground(false);
+        lineChart.setMaxHighlightDistance(300);
+        XAxis xl = lineChart.getXAxis();
+//        xl.setTextColor(Color.WHITE);
+        xl.setDrawGridLines(false);
+//        xl.setAvoidFirstLastClipping(true);
+        xl.setEnabled(true);
+    }
+
+    private void setLineChartData(LineChart lineChart, float client, String label) {
+        LineData data = lineChart.getData();
+        if (data != null) {
+            ILineDataSet clientDataSet = data.getDataSetByIndex(0);
+//            ILineDataSet setY = data.getDataSetByIndex(1);
+            // set.addEntry(...); // can be called as well
+
+            if (clientDataSet == null) {
+                clientDataSet = createSet(label);
+                data.addDataSet(clientDataSet);
+            }
+
+      /*      if (setY == null) {
+                setY = createSet("y");
+                data.addDataSet(setY);
+            }*/
+
+            data.addEntry(new Entry(clientDataSet.getEntryCount(), client), 0);
+//            data.addEntry(new Entry(setY.getEntryCount(), clientX), 1);
+
+            data.notifyDataChanged();
+
+            // let the chart know it's data has changed
+            lineChart.notifyDataSetChanged();
+
+            // limit the number of visible entries
+            lineChart.setVisibleXRangeMaximum(100);
+            // chart.setVisibleYRange(30, AxisDependency.LEFT);
+
+            // move to the latest entry
+            lineChart.moveViewToX(data.getEntryCount());
+
+        }
     }
 
 }

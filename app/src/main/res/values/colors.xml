@@ -11,6 +11,7 @@
     <color name="content_background">#f2f2f2</color>
     <color name="solar_background">#009988</color>
     <color name="tes">#BBf54a00</color>
+    <color name="chart_bg">#E0E0E0</color>
 
 
 </resources>
