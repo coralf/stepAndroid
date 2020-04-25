@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 public class Server {
 
 
+    private volatile ServerSocket s = null;
+
     public interface ServerCallBack {
 
         void message(String msg);
@@ -35,26 +37,30 @@ public class Server {
             ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(3, 5,
                     1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(128));
             try {
-                ServerSocket s = new ServerSocket(Config.port);
+                if (s == null) {
+                    s = new ServerSocket(Config.port);
+                }
                 while (true) {
                     try {
-                        Socket socket = s.accept();
-                        poolExecutor.execute(() -> {
-                            InputStream inputStream = null;
-                            try {
-                                inputStream = socket.getInputStream();
-                                byte[] bytes = new byte[1024];
-                                int len;
-                                while ((len = inputStream.read(bytes)) != -1) {
-                                    serverCallBack.message(new String(bytes, 0, len, "UTF-8"));
+                        if (!s.isClosed()) {
+                            Socket socket = s.accept();
+                            poolExecutor.execute(() -> {
+                                InputStream inputStream = null;
+                                try {
+                                    inputStream = socket.getInputStream();
+                                    byte[] bytes = new byte[1024];
+                                    int len;
+                                    while ((len = inputStream.read(bytes)) != -1) {
+                                        serverCallBack.message(new String(bytes, 0, len, "UTF-8"));
+                                    }
+                                    inputStream.close();
+                                    socket.close();
+                                    s.close();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
                                 }
-                                inputStream.close();
-                                socket.close();
-                                s.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        });
+                            });
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -63,8 +69,6 @@ public class Server {
                 e.printStackTrace();
             }
             Log.d(TAG, "onCreate: 等待客户端连接");
-
-
         }).start();
     }
 

@@ -111,9 +111,12 @@ public class GPSFragment extends Fragment implements SensorEventListener {
 
         Server server = Server.getServer();
         server.setOnServerMessageCallBack(msg -> {
-
-            Orientation orientation = new Gson().fromJson(msg, Orientation.class);
-            orientationQueue.offer(orientation);
+            try {
+                Orientation orientation = new Gson().fromJson(msg, Orientation.class);
+                orientationQueue.offer(orientation);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
 
     }

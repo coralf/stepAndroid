@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 
 import com.android.step.utils.Config;
 
@@ -13,6 +14,8 @@ import java.net.Socket;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class Client {
 
@@ -75,7 +78,9 @@ public class Client {
             poolExecutor.execute(new Thread(() -> {
                 synchronized (getClient()) {
                     try {
-                        outputStream.write(msg.getBytes("UTF-8"));
+                        Log.d(TAG, "Client send data: " + msg);
+                        byte[] bytes = msg.getBytes("UTF-8");
+                        outputStream.write(bytes);
                         outputStream.flush();
                     } catch (IOException e) {
                         if (outputStream != null) {
