@@ -105,8 +105,6 @@ public class Client {
                 }
             }));
         }
-
-
     }
 
     private String getUrl(Context context) {

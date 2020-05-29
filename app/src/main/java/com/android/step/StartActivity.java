@@ -32,8 +32,6 @@ public class StartActivity extends AppCompatActivity {
             intent.putExtra("from", Config.SERVER);
             startActivity(intent);
         });
-
-
     }
 
 }

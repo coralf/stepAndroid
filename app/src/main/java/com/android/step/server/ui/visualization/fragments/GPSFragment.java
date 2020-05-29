@@ -36,6 +36,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 
@@ -48,8 +49,8 @@ public class GPSFragment extends Fragment implements SensorEventListener {
     private LineChart lineChartZ;
     private SensorManager sensorManager;
     private Sensor sensor;
-    private Queue<Orientation> orientationQueue = new LinkedList<>();
     protected Typeface tfLight;
+    private Queue<Orientation> orientationQueue = new LinkedList<>();
 
     @Nullable
     @Override

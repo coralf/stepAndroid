@@ -1,6 +1,9 @@
 package com.android.step.server.ui.config;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +19,7 @@ import androidx.fragment.app.Fragment;
 
 import com.android.step.R;
 import com.android.step.db.Step;
+import com.android.step.server.ui.OnceGaitRecodActivity;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
@@ -32,6 +36,8 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.dialog.MaterialDialogs;
 import com.haibin.calendarview.Calendar;
 import com.haibin.calendarview.CalendarLayout;
 import com.haibin.calendarview.CalendarView;
@@ -52,7 +58,7 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
 public class ConfigFragment extends Fragment implements
         CalendarView.OnCalendarSelectListener,
         CalendarView.OnYearChangeListener,
-        View.OnClickListener {
+        View.OnClickListener, CalendarView.OnCalendarLongClickListener {
     TextView mTextMonthDay;
 
     TextView mTextYear;
@@ -98,7 +104,6 @@ public class ConfigFragment extends Fragment implements
             public void onClick(View v) {
                 if (!mCalendarLayout.isExpand()) {
                     mCalendarLayout.expand();
-                    return;
                 }
                 mCalendarView.showYearSelectLayout(mYear);
                 mTextLunar.setVisibility(View.GONE);
@@ -113,6 +118,7 @@ public class ConfigFragment extends Fragment implements
             }
         });
         mCalendarView.setOnCalendarSelectListener(this);
+        mCalendarView.setOnCalendarLongClickListener(this);
         mCalendarView.setOnYearChangeListener(this);
         mTextYear.setText(String.valueOf(mCalendarView.getCurYear()));
         mYear = mCalendarView.getCurYear();
@@ -141,15 +147,11 @@ public class ConfigFragment extends Fragment implements
 
         barChart.getDescription().setEnabled(false);
 
-        // if more than 60 entries are displayed in the chart, no values will be
-        // drawn
         barChart.setMaxVisibleValueCount(60);
 
-        // scaling can now only be done on x- and y-axis separately
         barChart.setPinchZoom(false);
 
         barChart.setDrawGridBackground(false);
-        // chart.setDrawYLabels(false);
 
         barChart.getLegend().setEnabled(false);
         ValueFormatter xAxisFormatter = new DayFormatter();
@@ -226,8 +228,6 @@ public class ConfigFragment extends Fragment implements
     public void setStepData() {
         List<Step> stepList = LitePal.findAll(Step.class);
         long currentMillis = System.currentTimeMillis();
-//        LitePal.deleteAll(Step.class);
-        //如果没有数据造点测试数据
         if (stepList.size() < 1) {
             List<Step> stepData = new ArrayList<>();
 
@@ -288,15 +288,36 @@ public class ConfigFragment extends Fragment implements
         mTextMonthDay.setText(month + "月" + day + "日");
         mTextYear.setText(String.valueOf(mYear));
         mTextLunar.setText(calendar.getLunar());
-
-
         setTextCurrentDay(mYear, month, day);
         resetBarData(mYear, month, day);
 
     }
 
+    private void selectCurrentDay(int year, int month, int day) {
+
+        List<String> items = new ArrayList<>();
+        for (int i = 1; i <= 50; i++) {
+            items.add("第" + i + "次采集记录");
+        }
+        String[] arrItems = new String[items.size()];
+        items.toArray(arrItems);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("步态记录：" + year + "年" + month + "月" + day + "日");
+        builder.setItems(arrItems, (dialog, index) -> {
+            toOnceGaitActivity(items.get(index));
+        });
+        builder.create().show();
+
+    }
+
+    private void toOnceGaitActivity(String s) {
+        Intent intent = new Intent(this.getActivity(), OnceGaitRecodActivity.class);
+        intent.putExtra("param", s);
+        startActivity(intent);
+    }
+
     private void resetBarData(int year, int month, int day) {
-        mTxBarTitle.setText(month + "月运动统计");
+        mTxBarTitle.setText(month + "月步态统计");
         setLineData(year, month, day);
         barChart.invalidate();
 
@@ -314,20 +335,28 @@ public class ConfigFragment extends Fragment implements
 
 
     private List<Step> getCurrentMonthStepData(int year, int month, int day) throws ParseException {
-//        String dateStr = currentYear + "-" + month + "-" + day;
-//        Log.d(TAG, "getCurrentMonthStepData: dateStr" + dateStr);
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//        Date parse = sdf.parse(dateStr);
-//        String formatDate = sdf.format(parse);
-//        List<Step> stepList = LitePal.where("datetime(date) >= datetime('" + formatDate + "','start of month','+0 month','-0 day') and \n" +
-//                "datetime(date) < datetime('" + formatDate + "','start of month','+1 month','0 day')").find(Step.class);
         List<Step> stepList = LitePal.where("year = ? and month = ?", year + "", month + "").find(Step.class);
-//        Log.d(TAG, "setLineData: stepList len:" + stepList.size());
-//        for (Step step : stepList) {
-//            Log.d(TAG, "getCurrentMonthStepData: " + step.toString());
-//        }
+        return stepList;
+    }
+
+    private List<Step> testGetCurrentMonthStepData(int year, int month, int day) throws ParseException {
+        List<Step> stepList = LitePal.where("year = ? and month = ?", year + "", month + "").find(Step.class);
+        Log.d(TAG, "setLineData: stepList len:" + stepList.size());
+        for (Step step : stepList) {
+            Log.d(TAG, "getCurrentMonthStepData: " + step.toString());
+        }
         return stepList;
     }
 
 
+    @Override
+    public void onCalendarLongClickOutOfRange(Calendar calendar) {
+
+    }
+
+    @Override
+    public void onCalendarLongClick(Calendar calendar) {
+        selectCurrentDay(calendar.getYear(), calendar.getMonth(), calendar.getDay());
+
+    }
 }

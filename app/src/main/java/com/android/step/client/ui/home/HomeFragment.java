@@ -24,7 +24,7 @@ public class HomeFragment extends Fragment implements SensorEventListener {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
+        View root = inflater.inflate(R.layout.fragment_home_left, container, false);
         return root;
     }
 

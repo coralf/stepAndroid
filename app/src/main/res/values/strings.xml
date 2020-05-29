@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">step</string>
-    <string name="title_home">首页</string>
-    <string name="title_dashboard">可视化</string>
-    <string name="title_notifications">运动记录</string>
+    <string name="title_home">步态采集</string>
+    <string name="title_dashboard">数据可视化</string>
+    <string name="title_notifications">数据管理</string>
     <string name="title_activity_start">StartActivity</string>
+    <string name="title_activity_once_gait_recod">OnceGaitRecodActivity</string>
 </resources>
