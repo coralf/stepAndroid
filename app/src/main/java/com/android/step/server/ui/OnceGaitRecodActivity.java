@@ -10,6 +10,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 
+import com.android.step.db.GaitRecord;
 import com.android.step.db.RecordAccelerometer;
 import com.android.step.utils.Config;
 import com.android.step.utils.TimeUtils;
@@ -47,17 +48,19 @@ import java.util.Queue;
 
 import static org.litepal.LitePalApplication.getContext;
 
-public class OnceGaitRecodActivity extends AppCompatActivity implements SensorEventListener {
+public class OnceGaitRecodActivity extends AppCompatActivity {
 
 
     private static final String TAG = "OnceGaitRecodActivity";
 
-    private SensorManager sensorManager;
-    private Sensor sensor;
 
     private LineChart lineChartX;
 
     private LineView lineView;
+
+    private String date;
+    private int count;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,46 +68,54 @@ public class OnceGaitRecodActivity extends AppCompatActivity implements SensorEv
         setContentView(R.layout.activity_once_gait_recod);
         Toolbar toolbar = findViewById(R.id.toolbar);
         Intent intent = getIntent();
-        String s = intent.getStringExtra("param");
-        toolbar.setTitle(s);
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        count = intent.getIntExtra("count", 0);
+        date = intent.getStringExtra("date");
+        toolbar.setTitle(date);
         lineChartX = findViewById(R.id.chartLineX);
-        lineView = new LineView(lineChartX, "水平加速度", getResources().getColor(R.color.colorAccent));
+        lineView = new LineView(lineChartX, Config.ACC_X_S, Config.ACC_X_C, getResources().getColor(R.color.colorAccent), getResources().getColor(R.color.colorPrimary));
         startUpateLineData();
-
-
     }
 
     private Handler handler = new Handler() {
         public void handleMessage(Message msg) {
             if (msg.what == 1) {
-                RecordAccelerometer accelerometer = (RecordAccelerometer) msg.obj;
-                lineView.setLineChartData(accelerometer.getX());
+                Acc accelerometer = (Acc) msg.obj;
+                lineView.setLineChartData(accelerometer.accServerX, accelerometer.accClientX);
             }
             // 要做的事情
             super.handleMessage(msg);
         }
     };
 
+    private class Acc {
+        float accClientX;
+        float accServerX;
+    }
+
     private void startUpateLineData() {
         new Thread(() -> {
-            List<RecordAccelerometer> accelerometerList = LitePal.findAll(RecordAccelerometer.class);
-            Queue<RecordAccelerometer> queue = new LinkedList<>();
-            for (RecordAccelerometer item : accelerometerList) {
-                queue.offer(item);
+            List<GaitRecord> accelerometerList = LitePal.where("date=? and count=?", date, count + "").order("time").find(GaitRecord.class);
+
+            Queue<Acc> queueClient = new LinkedList<>();
+            for (GaitRecord item : accelerometerList) {
+                Acc acc = new Acc();
+                if (item.getTerminal().equals(Config.CLIENT)) {
+                    acc.accClientX = item.getAccX();
+                } else {
+                    acc.accServerX = item.getAccX();
+                }
+                queueClient.offer(acc);
             }
-            if (queue.isEmpty()) {
+            if (queueClient.isEmpty()) {
                 return;
             }
             try {
-                while (!queue.isEmpty()) {
-                    RecordAccelerometer accelerometer = queue.poll();
+                while (!queueClient.isEmpty()) {
+                    Acc accelerometer = queueClient.poll();
                     Message message = new Message();
                     message.what = 1;
                     message.obj = accelerometer;
-                    Log.d(TAG, "startUpateLineData: " + accelerometer.getX());
-                    queue.offer(accelerometer);
+                    queueClient.offer(accelerometer);
                     handler.sendMessage(message);
                     Thread.sleep(30);
                 }
@@ -114,42 +125,4 @@ public class OnceGaitRecodActivity extends AppCompatActivity implements SensorEv
         }).start();
     }
 
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        sensorManager.unregisterListener(this);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        final float alpha = 0.8f;
-        float gravity[] = new float[3];
-        float linearAcceleration[] = new float[3];
-        gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
-        gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
-        gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
-        linearAcceleration[0] = event.values[0] - gravity[0];
-        linearAcceleration[1] = event.values[1] - gravity[1];
-        linearAcceleration[2] = event.values[2] - gravity[2];
-//        lineView.setLineChartData(event.values[0]);
-//        RecordAccelerometer recordAccelerometer = new RecordAccelerometer(TimeUtils.getNowDateString(), event.values[0], event.values[0], event.values[0], 1);
-//        recordAccelerometer.save();
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
-    }
 }

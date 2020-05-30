@@ -40,6 +40,7 @@ public class Server {
                 if (s == null) {
                     s = new ServerSocket(Config.port);
                 }
+                Log.d(TAG, "Server: 开启等待连接");
                 while (true) {
                     try {
                         if (!s.isClosed()) {

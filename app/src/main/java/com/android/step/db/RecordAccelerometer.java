@@ -15,13 +15,8 @@ public class RecordAccelerometer extends LitePalSupport {
     private float z;
     private int recordCount;
 
-    public RecordAccelerometer(String date, float x, float y, float z, int recordCount) {
-        this.date = date;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.recordCount = recordCount;
-    }
+
+
 
 
     public float getX() {

@@ -38,7 +38,7 @@ public class Client {
     }
 
 
-    public synchronized void send(String msg, Context context) {
+    public synchronized Client send(String msg, Context context) {
         if (poolExecutor == null) {
             poolExecutor = new ThreadPoolExecutor(3, 5,
                     1, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(128));
@@ -105,16 +105,17 @@ public class Client {
                 }
             }));
         }
+        return this;
     }
 
-    private String getUrl(Context context) {
+    public static String getUrl(Context context) {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
         int ipAddress = dhcpInfo.serverAddress;
         return intToIp(ipAddress);
     }
 
-    private String intToIp(int paramInt) {
+    private static String intToIp(int paramInt) {
         return (paramInt & 0xFF) + "." + (0xFF & paramInt >> 8) + "." + (0xFF & paramInt >> 16) + "."
                 + (0xFF & paramInt >> 24);
     }

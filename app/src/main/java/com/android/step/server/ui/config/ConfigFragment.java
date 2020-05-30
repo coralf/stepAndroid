@@ -18,8 +18,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.android.step.R;
+import com.android.step.db.GaitRecord;
 import com.android.step.db.Step;
 import com.android.step.server.ui.OnceGaitRecodActivity;
+import com.android.step.utils.TimeUtils;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Legend;
@@ -295,24 +297,50 @@ public class ConfigFragment extends Fragment implements
 
     private void selectCurrentDay(int year, int month, int day) {
 
-        List<String> items = new ArrayList<>();
-        for (int i = 1; i <= 50; i++) {
-            items.add("第" + i + "次采集记录");
+        String compDate = TimeUtils.getDateByNum(year, month, day);
+        List<GaitRecord> gaitRecords = LitePal.where("date=?", compDate).order("count").find(GaitRecord.class);
+
+        List<GaitRecord> currentGaitRecords = new ArrayList<>();
+        for (GaitRecord gaitRecord : gaitRecords) {
+            if (!sameCount(currentGaitRecords, gaitRecord.getCount())) {
+                currentGaitRecords.add(gaitRecord);
+            }
         }
-        String[] arrItems = new String[items.size()];
-        items.toArray(arrItems);
+
+
+//
+//        List<String> items = new ArrayList<>();
+//        for (int i = 1; i <= 50; i++) {
+//            items.add("第" + i + "次采集记录");
+//        }
+
+        String[] countArr = new String[currentGaitRecords.size()];
+
+        for (int i = 0; i < currentGaitRecords.size(); i++) {
+            countArr[i] = "第" + currentGaitRecords.get(i).getCount() + "次步态采集记录";
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("步态记录：" + year + "年" + month + "月" + day + "日");
-        builder.setItems(arrItems, (dialog, index) -> {
-            toOnceGaitActivity(items.get(index));
+        builder.setItems(countArr, (dialog, index) -> {
+            toOnceGaitActivity(currentGaitRecords.get(index));
         });
         builder.create().show();
-
     }
 
-    private void toOnceGaitActivity(String s) {
+    private boolean sameCount(List<GaitRecord> currentGaitRecords, int count) {
+        for (GaitRecord gaitRecord : currentGaitRecords) {
+            if (gaitRecord.getCount() == count) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void toOnceGaitActivity(GaitRecord s) {
         Intent intent = new Intent(this.getActivity(), OnceGaitRecodActivity.class);
-        intent.putExtra("param", s);
+        intent.putExtra("count", s.getCount());
+        intent.putExtra("date", s.getDate());
         startActivity(intent);
     }
 

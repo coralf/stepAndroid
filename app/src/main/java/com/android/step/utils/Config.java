@@ -11,4 +11,7 @@ public class Config {
     public static final String clientY = "左侧：Y";
     public static final String clientZ = "左侧：Z";
 
+    public static final String ACC_X_C = "左侧加速度";
+    public static final String ACC_X_S = "右侧加加速";
+
 }

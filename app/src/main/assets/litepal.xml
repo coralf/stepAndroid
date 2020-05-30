@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <litepal>
     <dbname value="step_db" />
-    <version value="3" />
+    <version value="4" />
     <list>
         <mapping class="com.android.step.db.Step" />
         <mapping class="com.android.step.db.RecordAccelerometer" />
+        <mapping class="com.android.step.db.GaitRecord" />
     </list>
 
 </litepal>
