@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -295,6 +296,7 @@ public class ConfigFragment extends Fragment implements
 
     }
 
+
     private void selectCurrentDay(int year, int month, int day) {
 
         String compDate = TimeUtils.getDateByNum(year, month, day);
@@ -321,11 +323,41 @@ public class ConfigFragment extends Fragment implements
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
         builder.setTitle("步态记录：" + year + "年" + month + "月" + day + "日");
         builder.setItems(countArr, (dialog, index) -> {
-            toOnceGaitActivity(currentGaitRecords.get(index));
+//            toOnceGaitActivity(currentGaitRecords.get(index));
+            selectAlertDialog(currentGaitRecords.get(index));
         });
         builder.create().show();
+    }
+
+    private void selectAlertDialog(GaitRecord gaitRecord) {
+        String[] strArr = {"查询", "删除"};
+        new AlertDialog.Builder(getActivity())
+                .setTitle("步态记录：" + TimeUtils.getDate(gaitRecord.getDate()))
+                .setItems(strArr, (dialog, index) -> {
+                    if (strArr[0].equals(strArr[index])) {
+                        toOnceGaitActivity(gaitRecord);
+                    } else if (strArr[1].equals(strArr[index])) {
+                        confirmDelete(gaitRecord);
+                    }
+                })
+                .setCancelable(true)
+                .create().show();
+    }
+
+    private void confirmDelete(GaitRecord gaitRecord) {
+        new AlertDialog.Builder(getContext())
+                .setTitle("删除确认")
+                .setMessage("确定要删除" + TimeUtils.getDate(gaitRecord.getDate()) + "第" + gaitRecord.getCount() + "次的步测记录吗？")
+                .setPositiveButton("是", (dialog, which) -> {
+                    int record = LitePal.deleteAll("GaitRecord", "date=? and count=?", gaitRecord.getDate(), gaitRecord.getCount() + "");
+                    Toast.makeText(getContext(), "删除步态记录" + record + "条成功", Toast.LENGTH_SHORT).show();
+                    dialog.cancel();
+                })
+                .setNegativeButton("否", null)
+                .show();
     }
 
     private boolean sameCount(List<GaitRecord> currentGaitRecords, int count) {

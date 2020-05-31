@@ -82,7 +82,6 @@ public class OnceGaitRecodActivity extends AppCompatActivity {
                 Acc accelerometer = (Acc) msg.obj;
                 lineView.setLineChartData(accelerometer.accServerX, accelerometer.accClientX);
             }
-            // 要做的事情
             super.handleMessage(msg);
         }
     };

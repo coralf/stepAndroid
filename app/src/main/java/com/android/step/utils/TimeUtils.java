@@ -24,4 +24,11 @@ public class TimeUtils {
         }
         return "";
     }
+
+
+    public static String getDate(String s) {
+        String[] split = s.split("-");
+        return split[0] + "年" + split[1] + "月" + split[2] + "日";
+    }
+
 }
