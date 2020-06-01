@@ -183,14 +183,9 @@ public class GPSFragment extends Fragment implements SensorEventListener {
 
             data.notifyDataChanged();
 
-            // let the chart know it's data has changed
             lineChart.notifyDataSetChanged();
 
-            // limit the number of visible entries
             lineChart.setVisibleXRangeMaximum(100);
-            // chart.setVisibleYRange(30, AxisDependency.LEFT);
-
-            // move to the latest entry
             lineChart.moveViewToX(data.getEntryCount());
 
         }

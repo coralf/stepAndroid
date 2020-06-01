@@ -203,7 +203,6 @@ public class ConfigFragment extends Fragment implements
             map.put(getSchemeCalendar(year, month, day, R.color.colorAccentA, stepCount).toString(),
                     getSchemeCalendar(year, month, day, R.color.colorAccentA, stepCount));
         }
-        //此方法在巨大的数据量上不影响遍历性能，推荐使用
         mCalendarView.setSchemeDate(map);
         setStepData();
     }
@@ -216,8 +215,6 @@ public class ConfigFragment extends Fragment implements
     public void setStepData() {
         List<Step> stepList = LitePal.findAll(Step.class);
         long currentMillis = System.currentTimeMillis();
-//        LitePal.deleteAll(Step.class);
-        //如果没有数据造点测试数据
         if (stepList.size() < 1) {
             List<Step> stepData = new ArrayList<>();
 
@@ -256,7 +253,7 @@ public class ConfigFragment extends Fragment implements
         calendar.setYear(year);
         calendar.setMonth(month);
         calendar.setDay(day);
-        calendar.setSchemeColor(color);//如果单独标记颜色、则会使用这个颜色
+        calendar.setSchemeColor(color);
         calendar.setScheme(text);
         return calendar;
     }

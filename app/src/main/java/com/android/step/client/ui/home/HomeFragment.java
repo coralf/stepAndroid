@@ -198,7 +198,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     mSensorManager.registerListener(sensorEventListener, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
                 }
             }
-            // 要做的事情
             super.handleMessage(msg);
         }
     };

@@ -10,11 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.step.R;
 
 
-/**
- * 带分组浮动的RecyclerView
- * Created by haibin on 2017/5/15.
- */
-@SuppressWarnings("all")
+
 public class GroupRecyclerView extends RecyclerView {
     private GroupItemDecoration mItemDecoration;
     private int mGroupHeight;
@@ -83,9 +79,6 @@ public class GroupRecyclerView extends RecyclerView {
         this.mListener = listener;
     }
 
-    /**
-     * 分组最上面改变通知
-     */
     public interface OnGroupChangeListener {
         void onGroupChange(int groupPosition, String group);
     }

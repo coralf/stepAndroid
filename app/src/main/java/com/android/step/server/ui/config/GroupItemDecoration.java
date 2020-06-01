@@ -13,11 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 分组浮动的ItemDecoration
- * Created by haibin on 2017/5/15.
- */
-@SuppressWarnings("all")
 public class GroupItemDecoration<Group, Child> extends RecyclerView.ItemDecoration {
     protected int mGroupHeight;
     protected int mGroutBackground;
@@ -47,25 +42,14 @@ public class GroupItemDecoration<Group, Child> extends RecyclerView.ItemDecorati
         mTextPaint.setAntiAlias(true);
     }
 
-    /**
-     * 先于RecyclerView的Item onDraw调用
-     *
-     * @param c      RecyclerView canvas
-     * @param parent RecyclerView
-     * @param state  stare
-     */
+
     @Override
     public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
         super.onDraw(c, parent, state);
         onDrawGroup(c, parent);
     }
 
-    /**
-     * 绘制分组Group
-     *
-     * @param c      Canvas
-     * @param parent RecyclerView
-     */
+
     protected void onDrawGroup(Canvas c, RecyclerView parent) {
         int paddingLeft = parent.getPaddingLeft();
         int right = parent.getWidth() - parent.getPaddingRight();
@@ -92,25 +76,14 @@ public class GroupItemDecoration<Group, Child> extends RecyclerView.ItemDecorati
         }
     }
 
-    /**
-     * 后于RecyclerView的Item onDraw调用
-     *
-     * @param c      RecyclerView canvas
-     * @param parent RecyclerView
-     * @param state  stare
-     */
+
     @Override
     public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
         super.onDrawOver(c, parent, state);
         onDrawOverGroup(c, parent);
     }
 
-    /**
-     * 绘制悬浮组
-     *
-     * @param c      Canvas
-     * @param parent RecyclerView
-     */
+
     protected void onDrawOverGroup(Canvas c, RecyclerView parent) {
         int firstVisiblePosition = ((LinearLayoutManager) parent.getLayoutManager()).findFirstVisibleItemPosition();
         if (firstVisiblePosition == RecyclerView.NO_POSITION) {
@@ -154,28 +127,14 @@ public class GroupItemDecoration<Group, Child> extends RecyclerView.ItemDecorati
         }
     }
 
-    /**
-     * 设置item的上下左右偏移量
-     *
-     * @param outRect rect
-     * @param view    item
-     * @param parent  RecyclerView
-     * @param state   stare
-     */
+
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         super.getItemOffsets(outRect, view, parent, state);
         getItemOffsets(outRect, view, parent, parent.getChildViewHolder(view).getAdapterPosition());
     }
 
-    /**
-     * 设置item的上下左右偏移量，不做任何处理就是默认状态
-     *
-     * @param outRect         outRect
-     * @param view            view
-     * @param parent          RecyclerView
-     * @param adapterPosition position
-     */
+
     protected void getItemOffsets(Rect outRect, View view, RecyclerView parent, int adapterPosition) {
         if (mGroup.containsKey(adapterPosition)) {
             outRect.set(0, mGroupHeight, 0, mGroup.containsKey(adapterPosition + 1) ? 0 : mChildItemOffset);
@@ -184,12 +143,7 @@ public class GroupItemDecoration<Group, Child> extends RecyclerView.ItemDecorati
         }
     }
 
-    /**
-     * 获得当前ViewPosition所在的组
-     *
-     * @param position 当前View的position
-     * @return 当前ViewPosition所在的组
-     */
+
     protected Group getCroup(int position) {
         while (position >= 0) {
             if (mGroup.containsKey(position)) {
@@ -200,11 +154,7 @@ public class GroupItemDecoration<Group, Child> extends RecyclerView.ItemDecorati
         return null;
     }
 
-    /**
-     * 通知更新分组信息
-     *
-     * @param adapter GroupRecyclerAdapter
-     */
+
     public void notifyDataSetChanged(GroupRecyclerAdapter<Group, Child> adapter) {
         mGroup.clear();
         if (adapter == null) return;
@@ -258,23 +208,14 @@ public class GroupItemDecoration<Group, Child> extends RecyclerView.ItemDecorati
         isHasHeader = hasHeader;
     }
 
-    /**
-     * 获取文本的x坐标起点
-     *
-     * @param str 文本
-     * @return x
-     */
+
     protected float getTextX(String str) {
         Rect bounds = new Rect();
         mTextPaint.getTextBounds(str, 0, str.length(), bounds);
         return bounds.width() / 2;
     }
 
-    /**
-     * 获取文本的长度像素
-     * @param str 文本
-     * @return px
-     */
+
     protected float getTextLenghtPx(String str) {
         Rect bounds = new Rect();
         mTextPaint.getTextBounds(str, 0, str.length(), bounds);

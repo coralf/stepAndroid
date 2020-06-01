@@ -25,14 +25,6 @@ import com.android.step.gsensor.StepService;
 import com.android.step.gsensor.StepValuePassListener;
 import com.android.step.gsensor.UpdateUiCallBack;
 
-/**
- * Created by finnfu on 16/9/27.
- */
-
-/*
- * 后台计步的service
- * */
-
 public class RightStepService extends StepService {
 
     private static final String TAG = "RightStepService";

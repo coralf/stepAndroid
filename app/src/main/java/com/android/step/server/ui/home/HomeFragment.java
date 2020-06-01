@@ -72,7 +72,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private float accX;
     private float accY;
     private float accZ;
-    private int count;
+    private int count = -1;
 
 
     private SensorEventListener sensorEventListener = new SensorEventListener() {
@@ -82,17 +82,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             accY = event.values[1];
             accZ = event.values[2];
             float[] values = event.values;
-            List<GaitRecord> gaitRecords = LitePal.findAll(GaitRecord.class);
-            int count = 1;
-            if (gaitRecords != null && gaitRecords.size() > 0) {
-                GaitRecord gaitRecord = gaitRecords.get(gaitRecords.size() - 1);
-                if (gaitRecord.getStepCount() == 0) {
-                    count = gaitRecord.getCount();
+            if (count == -1) {
+                List<GaitRecord> gaitRecords = LitePal.where("date=?", TimeUtils.getNowDateString()).order("count desc").find(GaitRecord.class);
+                if (gaitRecords != null && gaitRecords.size() > 0) {
+                    count = gaitRecords.get(0).getCount() + 1;
                 } else {
-                    count = gaitRecord.getCount() + 1;
+                    count = 1;
                 }
             }
-            HomeFragment.this.count = count;
             GaitRecord gaitRecord = new GaitRecord(Config.SERVER, TimeUtils.getNowDateString(), new Date().getTime(), values[0], values[1], values[2], count, 0);
             gaitRecord.save();
         }
@@ -120,36 +117,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initAccSensor();
-        new Thread(() -> {
-            try {
-                ServerSocket serverSocket = new ServerSocket(Config.port);
-                while (true) {
-                    Socket socket = serverSocket.accept();
-                    InputStream inputStream = socket.getInputStream();
-                    byte[] bytes = new byte[1024];
-                    int len;
-                    StringBuffer sf = new StringBuffer();
-                    while ((len = inputStream.read(bytes)) != -1) {
-                        sf.append(new String(bytes, 0, len, "UTF-8"));
-                    }
-                    Type type = new TypeToken<List<GaitRecord>>() {
-                    }.getType();
-                    List<GaitRecord> orientationQueue = new Gson().fromJson(sf.toString(), type);
-                    for (GaitRecord gaitRecord : orientationQueue) {
-                        gaitRecord.setCount(count);
-                        gaitRecord.save();
-                    }
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getContext(), "接收客户端数据保存完成", Toast.LENGTH_LONG).show();
-                    });
-                    inputStream.close();
-                    socket.close();
-                    serverSocket.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+
 
     }
 
@@ -215,13 +183,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     mSensorManager.registerListener(sensorEventListener, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
                 }
             }
-            // 要做的事情
             super.handleMessage(msg);
         }
     };
 
     private void clickStartRecoed() {
 //        LitePal.deleteAll(GaitRecord.class);
+
         new Thread(() -> {
             int mins = 5;
             while (true) {
@@ -237,6 +205,37 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+        }).start();
+
+        new Thread(() -> {
+            try {
+                ServerSocket serverSocket = new ServerSocket(Config.port);
+                while (true) {
+                    Socket socket = serverSocket.accept();
+                    InputStream inputStream = socket.getInputStream();
+                    byte[] bytes = new byte[1024];
+                    int len;
+                    StringBuffer sf = new StringBuffer();
+                    while ((len = inputStream.read(bytes)) != -1) {
+                        sf.append(new String(bytes, 0, len, "UTF-8"));
+                    }
+                    Type type = new TypeToken<List<GaitRecord>>() {
+                    }.getType();
+                    List<GaitRecord> orientationQueue = new Gson().fromJson(sf.toString(), type);
+                    for (GaitRecord gaitRecord : orientationQueue) {
+                        gaitRecord.setCount(count);
+                        gaitRecord.save();
+                    }
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "接收客户端数据保存完成", Toast.LENGTH_LONG).show();
+                    });
+                    inputStream.close();
+                    socket.close();
+                    serverSocket.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }).start();
     }

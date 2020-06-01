@@ -14,11 +14,6 @@ import java.text.DecimalFormat;
 
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
-/**
- * 精美进度风格
- * Created by huanghaibin on 2018/2/8.
- */
-
 public class ProgressMonthView extends MonthView {
 
     private Paint mProgressPaint = new Paint();
@@ -91,25 +86,14 @@ public class ProgressMonthView extends MonthView {
         }
     }
 
-    /**
-     * 获取角度
-     *
-     * @param progress 进度
-     * @return 获取角度
-     */
+
     private static int getAngle(int progress) {
         float result = progress * 100 / 25000;
         return (int) (360 * result / 100);
     }
 
 
-    /**
-     * dp转px
-     *
-     * @param context context
-     * @param dpValue dp
-     * @return px
-     */
+
     private static int dipToPx(Context context, float dpValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);

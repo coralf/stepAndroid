@@ -17,14 +17,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-/**
- * Created by finnfu on 16/9/27.
- */
-
-/*
- * 后台计步的service
- * */
-
 public class StepService extends Service {
     private final IBinder mBinder = new StepBinder();
     private UpdateUiCallBack mCallback;
@@ -83,9 +75,6 @@ public class StepService extends Service {
 
     public int onStartCommand(Intent paramIntent, int paramInt1, int paramInt2) {
         Toast.makeText(this, "start", Toast.LENGTH_SHORT).show();
-        /*
-         * 灰色保活,使服务成为无通知栏显示的前台服务
-         * */
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
             startForeground(0, new Notification());
         } else {
@@ -110,7 +99,6 @@ public class StepService extends Service {
         this.mCallback = paramICallback;
     }
 
-    //重置StepCount
     public void resetValues() {
         mEdit.putString("steps", "0");
         mEdit.commit();

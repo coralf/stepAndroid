@@ -1,12 +1,5 @@
 package com.android.step.gsensor;
 
-/**
- * Created by finnfu on 16/9/27.
- */
-
-/*
-* 根据StepDetector传入的步点"数"步子
-* */
 public class StepCount implements StepCountListener{
 
     private int count = 0;
@@ -15,10 +8,6 @@ public class StepCount implements StepCountListener{
     private long timeOfLastPeak = 0;
     private long timeOfThisPeak = 0;
 
-    /*
-    * 连续走十步才会开始计步
-    * 连续走了9步以下,停留超过3秒,则计数清空
-    * */
     @Override
     public void countStep() {
         this.timeOfLastPeak = this.timeOfThisPeak;
